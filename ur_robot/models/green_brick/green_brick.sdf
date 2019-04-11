@@ -1,0 +1,67 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="green_brick">
+    <pose>0 0 0 0 0 0</pose>
+    <link name="link">
+
+      <inertial>
+        <mass>1.0</mass>
+        <inertia>
+          <ixx>0.016</ixx>
+          <ixy>0.000</ixy>
+          <ixz>0.000</ixz>
+          <iyy>0.080</iyy>
+          <iyz>0.000</iyz>
+          <izz>0.080</izz>
+        </inertia>
+      </inertial>
+
+      <collision name="collision">
+        <geometry>
+          <box>
+            <size>0.1 0.1 0.1</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.0</mu>
+              <mu2>1.0</mu2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>10000000.0</kp>
+              <kd>1.0</kd>
+              <min_depth>0.001</min_depth>
+              <max_vel>0.1</max_vel>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+
+      <visual name="visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.1 0.1</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Green</name>
+          </script>
+        </material>
+      </visual>
+
+    </link>
+    <plugin name="model_push" filename="libobject_pose_plugin.so">
+      <updateRate>10.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ObjectPose</topicName>
+      <frameName>world</frameName>
+    </plugin>
+  </model>
+</sdf>

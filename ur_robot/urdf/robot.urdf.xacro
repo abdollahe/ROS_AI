@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<robot name="ur" xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <link name="world"/>
+
+    <!-- Robot -->
+    <xacro:include filename="$(find ur_description)/urdf/ur5.urdf.xacro"/>
+    <xacro:ur5_robot prefix="" joint_limited="true"/>
+
+    <joint name="arm_to_world_joint" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+    </joint>
+
+
+
+    <!--&lt;!&ndash; Vacuum Gripper1 &ndash;&gt;-->
+    <!--<xacro:include filename="$(find hrwros_support)/urdf/vacuum_gripper/vacuum_gripper.xacro"/>-->
+    <!--<xacro:vacuum_gripper_urdf prefix="vacuum_gripper1_" joint_prefix="vacuum_gripper1_joint"/>-->
+
+
+    <!--&lt;!&ndash; gripper1 to robot1. &ndash;&gt;-->
+    <!--<joint name="gripper1_to_robot1" type="fixed">-->
+        <!--<parent link="tool0" />-->
+        <!--<child link="vacuum_gripper1_base_link" />-->
+    <!--</joint>-->
+
+
+    <gazebo>
+        <plugin name="gazebo_ros_magnetic_gripper" filename="libschunk_gripper_plugin.so">
+            <robotNamespace>/ur/magnetic_gripper</robotNamespace>
+            <bodyName>tool0</bodyName>
+            <topicName>grasping</topicName>
+        </plugin>
+    </gazebo>
+
+
+    <!--&lt;!&ndash; bins &ndash;&gt;-->
+    <!--<xacro:include filename="$(find ur_robot)/urdf/small_bin/bin.urdf"/>-->
+    <!--&lt;!&ndash;<xacro:bin_urdf prefix="bin_"/>&ndash;&gt;-->
+
+    <!--<joint name="bin_joint" type="fixed">-->
+        <!--<parent link="world" />-->
+        <!--<child link="bottom" />-->
+        <!--<origin xyz="0.0 0.75 0.0" rpy="0 0 0" />-->
+    <!--</joint>-->
+
+
+
+    <gazebo>
+        <plugin name="ros_control" filename="libgazebo_ros_control.so">
+            <!--robotNamespace>/</robotNamespace-->
+            <!--robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType-->
+        </plugin>
+    </gazebo>
+
+
+
+
+
+
+
+
+
+
+
+</robot>
+

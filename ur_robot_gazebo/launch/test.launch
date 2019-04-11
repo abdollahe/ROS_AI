@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<launch>
+    <!--<param name="red_box_path" type="str" value="$(find ur5_notebook)/urdf/red_box.urdf"/>-->
+
+    <arg name="limited" default="false"/>
+    <arg name="paused" default="true"/>s
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false" />
+    <arg name="sim" default="true" />
+
+    <!-- startup simulated world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find ur_robot_gazebo)/worlds/ur_robot_world.world"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="verbose" value="true" />
+    </include>
+
+    <!-- spwan ur5 -->
+    <!-- send robot urdf to param server -->
+    <include file="$(find ur_robot)/launch/ur_upload.launch">
+        <arg name="limited" value="$(arg limited)"/>
+    </include>
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <!--<node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.2 -y 0.7" respawn="false" output="screen" />-->
+    <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.01 -J  shoulder_lift_joint -1.5707 -unpause   " respawn="false" output="screen" />
+    <!-- -J robot_shoulder_lift_joint -1.5707 robot_wrist_1_joint -1.5707 -unpause -->
+    <include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
+
+    <rosparam file="$(find ur_gazebo)/controller/arm_controller_ur5.yaml" command="load"/>
+    <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
+
+
+    <!-- Remap follow_joint_trajectory -->
+    <remap if="$(arg sim)" from="/follow_joint_trajectory" to="/arm_controller/follow_joint_trajectory"/>
+
+    <!-- Launch moveit -->
+    <include file="$(find ur_robot_moveit_config)/launch/move_group.launch">
+        <!--<arg name="limited" default="$(arg limited)"/>-->
+        <arg name="debug" default="$(arg debug)" />
+    </include>
+
+    <!--&lt;!&ndash; spawn a cube for pick and place &ndash;&gt;-->
+    <!--<node name="spawn_cube" pkg="gazebo_ros" type="spawn_model" args="-file $(find ur_robot)/urdf/cube/cube.urdf -urdf -model cube" />-->
+
+    <!-- Load the URDF into the ROS Parameter Server -->
+    <param name="green_brick_description" command="$(find xacro)/xacro.py '$(find ur_robot)/models/green_brick/green_brick.sdf'" />
+
+<!--    &lt;!&ndash; Spawn URDF objects into Gazebo &ndash;&gt;-->
+<!--    <node name="spawn_green_brick1"-->
+<!--          pkg="gazebo_ros"-->
+<!--          type="spawn_model"-->
+<!--          output="screen"-->
+<!--          args="-sdf -param green_brick_description -x 0.5 -y 0.0 -z 0.0 -model green_brick_model_1" />-->
+
+
+    <param name="bin" command="$(find xacro)/xacro.py '$(find ur_robot)/urdf/small_bin/bin.urdf'" />
+
+    <!-- Spawn URDF objects into Gazebo -->
+    <node name="spawn_bin"
+          pkg="gazebo_ros"
+          type="spawn_model"
+          output="screen"
+          args="-urdf -param bin -x 0. -y 0.75 -z 0.1 -model bin_1" />
+
+
+    <include file="$(find ur_robot_gazebo)/launch/start_rosbag_nodes.launch"/>
+
+<!--    &lt;!&ndash; Remap follow_joint_trajectory &ndash;&gt;-->
+<!--    <remap from="joint_states" to="ur_robot/joint_states"/>-->
+
+</launch>

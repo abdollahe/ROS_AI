@@ -1,0 +1,12 @@
+<launch>
+
+    <node pkg="ur_robot_gazebo" type="joint_state_listener_node" name="joint_state_listener_node"/>
+    <node pkg="ur_robot_gazebo" type="target_pose_rosbag_node" name="target_pose_rosbag_node"/>
+    <node pkg="ur_robot_gazebo" type="goal_pose_rosbag_node" name="goal_pose_rosbag_node"/>
+    <node pkg="ur_robot_gazebo" type="magnetic_gripper_state_rosbag_node" name="magnetic_gripper_state_rosbag_node"/>
+    <node pkg="ur_robot_gazebo" type="joint_position_rosbag_node" name="joint_position_rosbag_node"/>
+    <node pkg="ur_robot_gazebo" type="joint_velocity_rosbag_node" name="joint_velocity_rosbag_node"/>
+    <node pkg="ur_robot_gazebo" type="ArmTfListener.py" name="arm_transform_listener_node"/>
+    <node pkg="ur_robot_gazebo" type="arm_position_rosbag_node" name="arm_position_rosbag_node"/>
+
+</launch>
