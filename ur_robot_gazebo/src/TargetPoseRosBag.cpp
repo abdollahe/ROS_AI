@@ -20,6 +20,7 @@ private :
     ros::Subscriber sub ;
 
     std::string topic_name = "target_object_pose" ;
+    std::string topic_name_save = "" ;
     ros::Time shiftTime ;
 
 public:
@@ -63,35 +64,42 @@ public:
 
         duration = rosTime1 - shiftTime ;
 
-        std::cout << "---------------" << std::endl ;
+        ros::Time timeToSave ;
+        timeToSave.nsec = duration.nsec ;
+        timeToSave.sec = duration.sec ;
 
+//        std::cout << "---------------" << std::endl ;
+//
         std::cout << "shift time is: " << shiftTime <<std::endl ;
-        std::cout << "time is: " << rosTime1 << std::endl ;
-
-
-
-
-        rosTime1.sec = rosTime1.sec - shiftTime.sec ;
-        rosTime1.nsec = rosTime1.nsec - shiftTime.nsec ;
-
-        std::cout << "time after subtraction is: " << rosTime1 << std::endl ;
-
-        ros::Time timeNew = rosTime1 - duration ;
-
-
-        std::cout << "The diff sec is: " << rosTime1.sec << std::endl ;
-        std::cout << "The diff nsec is: " << rosTime1.nsec << std::endl ;
-
-        std::cout << "The diff duration is: " << duration << std::endl ;
-
-        std::cout << "The new Time is: " << timeNew << std::endl ;
-
-        std::cout << "Time for saving is: " << rosTime1 << std::endl ;
-
-        std::cout << "---------------" << std::endl ;
+        std::cout << "time to save is : " << timeToSave << std::endl ;
+//
+//
+//
+//
+//        rosTime1.sec = rosTime1.sec - shiftTime.sec ;
+//        rosTime1.nsec = rosTime1.nsec - shiftTime.nsec ;
+//
+//        std::cout << "time after subtraction is: " << rosTime1 << std::endl ;
+//
+//        ros::Time timeNew = rosTime1 - duration ;
+//
+//
+//        std::cout << "The diff sec is: " << rosTime1.sec << std::endl ;
+//        std::cout << "The diff nsec is: " << rosTime1.nsec << std::endl ;
+//
+//        std::cout << "The diff duration is: " << duration << std::endl ;
+//
+//        std::cout << "The new Time is: " << timeNew << std::endl ;
+//
+//        std::cout << "Time for saving is: " << rosTime1 << std::endl ;
+//
+//        std::cout << "---------------" << std::endl ;
 
         //if(timeNew.toSec() == 0.0) {
-            bag.write(topic_name , rosTime1 , msg_) ;
+
+            msg_->header.stamp.sec = timeToSave.sec ;
+            msg_->header.stamp.nsec = timeToSave.nsec ;
+            bag.write(topic_name_save , timeToSave , msg_) ;
         //}
 
 //        else {
@@ -107,7 +115,7 @@ public:
     void RosBagConfigCallback(const ur_robot_gazebo::RosBagConfigPtr &msg_) {
         shiftTime = msg_->time.data ;
         std::cout << "In Config" << std::endl ;
-        topic_name = topic_name + "_" + msg_->topic_name ;
+        topic_name_save = topic_name + "_" + msg_->topic_name ;
     }
 
 };

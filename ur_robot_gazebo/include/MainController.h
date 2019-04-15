@@ -32,7 +32,7 @@ public:
 
     static void SetState(int stateNum) ;
 
-    static void ArmJointConfigDoneCallback(std_msgs::Bool data) ;
+    void ArmJointConfigDoneCallback(std_msgs::Bool data) ;
 
     static void ClockCallback(rosgraph_msgs::Clock clock ) ;
 
@@ -49,10 +49,18 @@ public:
 
     void ChangeRosBagState(bool enable) ;
 
+    void StartObjectGrasping() ;
+
+    void ToggleTimerState(bool state) ;
+
+    void ToggleEndTimerState(bool state) ;
+
+    void DeleteTargetObject() ;
+
 
     uint32_t iteration = 0 ;
 
-    enum States { State1 , State2 , State3 , State4 , State5 , State6 , State7 , State8,  endState };
+    enum States { State1 , State2 , State3 , State4 , State5 , State6 , State7 , State8, State9 , State10, State11, State12, State13, endState };
 
     static States state ;
 
@@ -62,10 +70,16 @@ public:
 
     bool reachedEnd = false ;
     static bool isRunning ;
+    static bool isExecuting ;
+    static bool targetExists ;
+    static bool enableArmJointConfigDoneSub  ;
 
 private:
 
 
+    ros::Timer timer ;
+
+    ros::Timer endTimer ;
 
     /// Sends joint states to robot for moving to a joint state
     ros::Publisher armJointPub ;
@@ -75,6 +89,14 @@ private:
 
     ros::Publisher rosConfigPub ;
     ros::Publisher rosStatePub ;
+
+
+    ros::Publisher startGraspingPub ;
+
+    ros::Publisher deleteTargetPub ;
+
+    float *target_position ;
+
 
 
 
@@ -107,9 +129,6 @@ private:
     int iteration_j3 = 0 ;
 
 
-
-
-
     ros::ServiceClient gazeboSimPause ;
 
     ros::ServiceClient gazeboSimUnPause ;
@@ -118,8 +137,6 @@ private:
     ros::Subscriber pickPlaceFinishSub ;
 
     ros::Subscriber armJointConfigDonSub ;
-    static bool enableArmJointConfigDoneSub  ;
-
 
 
 
@@ -127,6 +144,11 @@ private:
     ros::Subscriber clockSubsciber ;
 
     static ros::Time latestTime ;
+
+
+    void TimerCallback(const ros::TimerEvent&);
+
+    void EndTimeCallback(const ros::TimerEvent&) ;
 
 
 };

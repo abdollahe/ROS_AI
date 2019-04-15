@@ -9,6 +9,8 @@ import geometry_msgs
 import std_srvs.srv
 from ur_robot_gazebo.msg import JointStateSimple
 from std_msgs.msg import Bool
+from ur_robot_gazebo.msg import PoseMessageSimple
+from std_msgs.msg import Int32
 
 
 class PickAndPlace:
@@ -20,22 +22,51 @@ class PickAndPlace:
 
     move_to_joint_done_pub = None
 
+    pick_and_place_done_pub = None ;
+
+    target_pose = geometry_msgs.msg.Pose()
+
+
     def __init__(self):
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('simple_pick_place', anonymous=True)
         self.robot_group = moveit_commander.MoveGroupCommander("robot")
         rospy.Subscriber("/arm_joint_state", JointStateSimple, self.arm_joint_state_callback)
+        rospy.Subscriber("/ur_robot/arm_start_grasp", PoseMessageSimple, self.start_grasping_process_callback)
 
         self.move_to_joint_done_pub = rospy.Publisher('/ur_robot/move_joint_done', Bool, queue_size=1)
 
-        print("testing")
+        self.pick_and_place_done_pub = rospy.Publisher("/ur_robot/pick_place_finish", Int32, queue_size=1)
+
 
         #self.go_to_joint(self.joint_wait)
 
     def arm_joint_state_callback(self, data):
-        print("Yep Got Something!!!!")
         target_joint_state = data.joint_angles
         self.go_to_joint(target_joint_state)
+
+    def start_grasping_process_callback(self, data):
+        self.target_pose.position.x = data.position[0]
+        self.target_pose.position.y = data.position[1]
+        self.target_pose.position.z = data.position[2] + 0.05
+
+        # pose_goal = geometry_msgs.msg.Pose()
+        self.target_pose.orientation.w = 0.00802366832289
+        self.target_pose.orientation.x = 0.883899607609
+        self.target_pose.orientation.y = -0.467562344368
+        self.target_pose.orientation.z = -0.00652369106187
+        # pose_goal.position.x = 0.5
+        # pose_goal.position.y = 0.0
+        # pose_goal.position.z = 0.1
+
+        print("I am in the grasping callback")
+
+        self.move_to_target()
+
+        self.grasp_object()
+        self.move_from_target_to_goal()
+        self.release_object()
+        self.move_to_wait()
 
     def simple_pick_place(self):
         # First initialize moveit_commander and rospy.
@@ -105,19 +136,29 @@ class PickAndPlace:
         # elif res == 1:
         #     rospy.loginfo("Goal is being executed, waiting to finish to proceed")
 
-        self.go_to_joint(self.joint_wait)
+        # self.go_to_joint(self.joint_wait)
 
     def move_to_target(self):
-        pose_goal = geometry_msgs.msg.Pose()
-        pose_goal.orientation.w = 0.00802366832289
-        pose_goal.orientation.x = 0.883899607609
-        pose_goal.orientation.y = -0.467562344368
-        pose_goal.orientation.z = -0.00652369106187
-        pose_goal.position.x = 0.5
-        pose_goal.position.y = 0.0
-        pose_goal.position.z = 0.1
+        # pose_goal = geometry_msgs.msg.Pose()
+        # pose_goal.orientation.w = 0.00802366832289
+        # pose_goal.orientation.x = 0.883899607609
+        # pose_goal.orientation.y = -0.467562344368
+        # pose_goal.orientation.z = -0.00652369106187
+        # pose_goal.position.x = 0.5
+        # pose_goal.position.y = 0.0
+        # pose_goal.position.z = 0.1
 
-        self.robot_group.set_pose_target(pose_goal)
+        # self.robot_group.set_pose_target(self.target_pose)
+        # plan = self.robot_group.go(wait=True)
+        #
+
+        # Calling `stop()` ensures that there is no residual movement
+        # self.robot_group.stop()
+        # It is always good to clear your targets after planning with poses.
+        # Note: there is no equivalent function for clear_joint_value_targets()
+        # self.robot_group.clear_pose_targets()
+
+        self.robot_group.set_pose_target(self.target_pose)
 
         # Plan to the desired joint-space goal using the default planner (RRTConnect).
         plan = self.robot_group.plan()
@@ -128,22 +169,26 @@ class PickAndPlace:
 
         # Send the goal to the action server.
         self.robot1_client.send_goal(robot1_goal)
-        res = self.robot1_client.wait_for_result()
-
-        if res == 2:
-            rospy.loginfo("Goal executed, proceeding to the next goal")
-        elif res == 1:
-            rospy.loginfo("Goal is being executed, waiting to finish to proceed")
+        res = False
+        for i in range(0,5):
+            res = self.robot1_client.wait_for_result()
+            if res:
+                rospy.loginfo("Goal executed - Move to target , proceeding to the next goal")
+                break
+            elif res:
+                rospy.loginfo("Goal is being executed - Move to target , waiting to finish to proceed")
 
     def go_to_joint(self, joints):
+        print("Executing the got to joints!!!!")
         self.robot_group.go(joints, wait=True)
-        print("Done")
         # Calling ``stop()`` ensures that there is no residual movement
         self.robot_group.stop()
 
         ctrl_c = False
         while not ctrl_c:
+            print("Sending done status back")
             if self.move_to_joint_done_pub.get_num_connections() > 0:
+                print("Sending done status back - after checking connection")
                 msg = Bool()
                 msg.data = True
                 self.move_to_joint_done_pub.publish(msg)
@@ -173,9 +218,9 @@ class PickAndPlace:
         res = self.robot1_client.wait_for_result()
 
         if res == 2:
-            rospy.loginfo("Goal executed, proceeding to the next goal")
+            rospy.loginfo("Goal executed - Move to pose , proceeding to the next goal")
         elif res == 1:
-            rospy.loginfo("Goal is being executed, waiting to finish to proceed")
+            rospy.loginfo("Goal is being executed - Move to Pose, waiting to finish to proceed")
 
     def move_from_target_to_goal(self):
         #  ## Cartesian Paths
@@ -293,13 +338,22 @@ class PickAndPlace:
         self.robot1_client.send_goal(robot1_goal)
         res = self.robot1_client.wait_for_result()
 
+        if res:
+            ctrl_c = False
+            while not ctrl_c:
+                if self.pick_and_place_done_pub.get_num_connections() > 0:
+                    msg = Int32()
+                    msg.data = 10
+                    self.pick_and_place_done_pub.publish(msg)
+                    ctrl_c = True
+
 
 if __name__ == '__main__':
 
 
     try:
         obj = PickAndPlace()
-        #obj.simple_pick_place()
+        obj.simple_pick_place()
         # obj.move_to_target()
         # obj.grasp_object()
         # obj.move_from_target_to_goal()
