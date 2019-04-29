@@ -68,46 +68,13 @@ public:
         timeToSave.nsec = duration.nsec ;
         timeToSave.sec = duration.sec ;
 
-//        std::cout << "---------------" << std::endl ;
-//
+
         std::cout << "shift time is: " << shiftTime <<std::endl ;
         std::cout << "time to save is : " << timeToSave << std::endl ;
-//
-//
-//
-//
-//        rosTime1.sec = rosTime1.sec - shiftTime.sec ;
-//        rosTime1.nsec = rosTime1.nsec - shiftTime.nsec ;
-//
-//        std::cout << "time after subtraction is: " << rosTime1 << std::endl ;
-//
-//        ros::Time timeNew = rosTime1 - duration ;
-//
-//
-//        std::cout << "The diff sec is: " << rosTime1.sec << std::endl ;
-//        std::cout << "The diff nsec is: " << rosTime1.nsec << std::endl ;
-//
-//        std::cout << "The diff duration is: " << duration << std::endl ;
-//
-//        std::cout << "The new Time is: " << timeNew << std::endl ;
-//
-//        std::cout << "Time for saving is: " << rosTime1 << std::endl ;
-//
-//        std::cout << "---------------" << std::endl ;
 
-        //if(timeNew.toSec() == 0.0) {
-
-            msg_->header.stamp.sec = timeToSave.sec ;
-            msg_->header.stamp.nsec = timeToSave.nsec ;
-            bag.write(topic_name_save , timeToSave , msg_) ;
-        //}
-
-//        else {
-//            bag.write(topic_name , timeNew , msg_) ;
-//        }
-
-
-        //std::cout << "Data saved in targetPose bag" << std::endl ;
+        msg_->header.stamp.sec = timeToSave.sec ;
+        msg_->header.stamp.nsec = timeToSave.nsec ;
+        bag.write(topic_name_save , timeToSave , msg_) ;
 
 
     }

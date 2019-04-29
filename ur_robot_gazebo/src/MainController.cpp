@@ -169,10 +169,13 @@ bool MainController::ChangeSimulationState(bool state) {
     if(state) {
         //std::cout << "Time when pausing is: " << latestTime << std::endl ;
         st = this->gazeboSimPause.call(empty) ;
+        if(!st)
+            std::cout << "The process of pausing the simulation was unsuccessful" << std::endl ;
     }
     else {
         //std::cout << "Time when un - pausing is: " << latestTime << std::endl ;
         st = this->gazeboSimUnPause.call(empty) ;
+        std::cout << "The process of un-pausing the simulation was unsuccessful" << std::endl ;
     }
 
     return st ;

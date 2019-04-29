@@ -21,6 +21,7 @@ private :
     ros::Subscriber sub ;
 
     std::string topic_name = "goal_object_pose" ;
+    std::string topic_name_save = "" ;
     ros::Time shiftTime ;
 
 public:
@@ -56,20 +57,31 @@ public:
 
     void GoalPoseCallback(const geometry_msgs::PoseStampedPtr& msg_) {
 
+        ros::Duration duration ;
+
         ros::Time rosTime1 = ros::Time::now() ;
-        rosTime1.sec = rosTime1.sec - shiftTime.sec ;
-        rosTime1.nsec = rosTime1.nsec - shiftTime.nsec ;
 
-        bag.write(topic_name , rosTime1 , msg_) ;
 
-        std::cout << "Data saved in targetPose bag" << std::endl ;
+        duration = rosTime1 - shiftTime ;
+
+        ros::Time timeToSave ;
+        timeToSave.nsec = duration.nsec ;
+        timeToSave.sec = duration.sec ;
+
+
+        std::cout << "shift time is: " << shiftTime <<std::endl ;
+        std::cout << "time to save is : " << timeToSave << std::endl ;
+
+        msg_->header.stamp.sec = timeToSave.sec ;
+        msg_->header.stamp.nsec = timeToSave.nsec ;
+        bag.write(topic_name_save , timeToSave , msg_) ;
 
 
     }
 
     void RosBagConfigCallback(const ur_robot_gazebo::RosBagConfigPtr &msg_) {
         shiftTime = msg_->time.data ;
-        topic_name = topic_name + "_" + msg_->topic_name ;
+        topic_name_save = topic_name + "_" + msg_->topic_name ;
     }
 
 

@@ -25,7 +25,7 @@ int main(int argc , char** argv ) {
    jointInfo.SetPublishers(n) ;
 
 
-   ros::Rate loop_rate(10);
+   ros::Rate loop_rate(5);
 
     while (ros::ok()) {
 
