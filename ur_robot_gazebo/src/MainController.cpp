@@ -36,6 +36,7 @@ MainController::MainController() {
 
     this->armJointConfigDonSub = this->rosNode->subscribe("/ur_robot/move_joint_done" , 1 , &MainController::ArmJointConfigDoneCallback , this) ;
 
+    this->checkTargetDeletedSub = this->rosNode->subscribe("/ur_robot/delete_cube_done" , 1 , &MainController::TargetObjectDeleteCheckCallback , this ) ;
 
     this->clockSubsciber = this->rosNode->subscribe("/clock" , 1 , &MainController::ClockCallback) ;
 
@@ -61,12 +62,31 @@ MainController::~MainController() {
 
 }
 
+void MainController::TargetObjectDeleteCheckCallback(std_msgs::Bool data) {
+    std::cout << "Delete Target Object callback has been called" << std::endl ;
+    MainController::state = MainController::State14 ;
+}
+
 
 void MainController::DeleteTargetObject() {
     std_msgs::Bool msg ;
     msg.data = true ;
 
-    this->deleteTargetPub.publish(msg) ;
+
+    ros::Rate loop_rate(10) ;
+    bool ctrl_c = false ;
+
+    while(!ctrl_c) {
+        if(deleteTargetPub.getNumSubscribers() > 0 ) {
+            this->deleteTargetPub.publish(msg) ;
+            std::cout << "Target Object delete request sent out" << std::endl ;
+            ctrl_c = true ;
+        }
+        else
+            loop_rate.sleep() ;
+    }
+
+
 }
 
 void MainController::EventCallback(std_msgs::Int32 data) {
@@ -414,7 +434,8 @@ int main() {
            float* armInitState ;
 
            switch (MainController::state) {
-               case MainController::State1 :   ///Change the target position
+               ///Change the target position
+               case MainController::State1 :
                    {
 
                        std::cout << "In State 1" << std::endl ;
@@ -431,11 +452,14 @@ int main() {
 
                    }
                    break;
-               case MainController::State2 : /// Set the joint states of the arm
+               /// Set the joint states of the arm
+               case MainController::State2 :
                    {
                        std::cout << "In State 2" << std::endl ;
+
                        mainController.ToggleEndTimerState(false) ;
-                     armInitState = mainController.SetUpInitJointState() ;
+
+                       armInitState = mainController.SetUpInitJointState() ;
 
                      if(!mainController.jointReachedEnd)
                      {
@@ -451,7 +475,7 @@ int main() {
                    }
                    break;
 
-               /// Spawn the target object in the ddesired position
+               /// Spawn the target object in the desired position
                case MainController::State3 :
                    {
                        std::cout << "In State 3" << std::endl ;
@@ -546,18 +570,22 @@ int main() {
                    break ;
 
                /// Delete the target object
-               case MainController::State13:
-                    {
-                       std::cout << "In state 13" << std::endl;
-                       mainController.DeleteTargetObject();
-                       std::cout << "One sequence done: -> Going to state 2" << std::endl;
-                       j++;
-                       //MainController::state = MainController::State2 ;
-                       boost::asio::io_service io;
-                       boost::asio::deadline_timer t(io, boost::posix_time::seconds(5));
-                       t.async_wait(&EndTimeCallback);
-                       io.run();
-                    }
+               case MainController::State13: {
+                   std::cout << "In state 13 - Waiting on target object to be deleted" << std::endl;
+                   mainController.DeleteTargetObject();
+
+               }
+                   break;
+               case MainController::State14: {
+
+                   std::cout << "One sequence done: -> Going to state 2" << std::endl;
+                   j++;
+                   //MainController::state = MainController::State2 ;
+                   boost::asio::io_service io;
+                   boost::asio::deadline_timer t(io, boost::posix_time::seconds(5));
+                   t.async_wait(&EndTimeCallback);
+                   io.run();
+               }
                     break ;
                default :
                    std::cout << "Error in the state machine" << std::endl ;

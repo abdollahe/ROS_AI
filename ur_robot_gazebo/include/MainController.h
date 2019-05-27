@@ -36,6 +36,8 @@ public:
 
     static void ClockCallback(rosgraph_msgs::Clock clock ) ;
 
+    void TargetObjectDeleteCheckCallback(std_msgs::Bool data) ;
+
 
     float* SetUpTargetPosition() ;
 
@@ -60,7 +62,8 @@ public:
 
     uint32_t iteration = 0 ;
 
-    enum States { State1 , State2 , State3 , State4 , State5 , State6 , State7 , State8, State9 , State10, State11, State12, State13, endState };
+    enum States { State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
+            State8, State9 , State10, State11, State12, State13, State14 , endState };
 
     static States state ;
 
@@ -137,6 +140,10 @@ private:
     ros::Subscriber pickPlaceFinishSub ;
 
     ros::Subscriber armJointConfigDonSub ;
+
+
+    ///Subscriber for checking if the target object has been deleted or not
+    ros::Subscriber checkTargetDeletedSub ;
 
 
 

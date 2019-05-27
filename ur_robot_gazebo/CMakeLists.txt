@@ -266,18 +266,18 @@ target_link_libraries(main_controller ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 
 
-# Create the libSideContactPlugin.so library.
-#set(side_contact_plugin_name SideContactPlugin)
-add_library(ContainPlugin plugins/ContainPlugin.cpp)
-target_link_libraries(ContainPlugin
-        ${GAZEBO_LIBRARIES}
-        ${catkin_LIBRARIES}
-        )
-
-## Create the libObjectDisposalPlugin.so library.
-##set(object_disposal_plugin_name ObjectDisposalPlugin)
-add_library(ContainPluginReceiver plugins/ContainPluginReceiver.cpp)
-target_link_libraries(ContainPluginReceiver
-        ${GAZEBO_LIBRARIES}
-        ${catkin_LIBRARIES}
-        )
+## Create the libSideContactPlugin.so library.
+##set(side_contact_plugin_name SideContactPlugin)
+#add_library(ContainPlugin plugins/ContainPlugin.cpp)
+#target_link_libraries(ContainPlugin
+#        ${GAZEBO_LIBRARIES}
+#        ${catkin_LIBRARIES}
+#        )
+#
+### Create the libObjectDisposalPlugin.so library.
+###set(object_disposal_plugin_name ObjectDisposalPlugin)
+#add_library(ContainPluginReceiver plugins/ContainPluginReceiver.cpp)
+#target_link_libraries(ContainPluginReceiver
+#        ${GAZEBO_LIBRARIES}
+#        ${catkin_LIBRARIES}
+#        )

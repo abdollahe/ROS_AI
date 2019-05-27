@@ -9,8 +9,8 @@
     <node pkg="ur_robot_gazebo" type="ArmTfListener.py" name="arm_transform_listener_node"/>
     <node pkg="ur_robot_gazebo" type="arm_position_rosbag_node" name="arm_position_rosbag_node"/>
 
-    <node pkg="ur_robot_gazebo" type="ObjectSpawner.py" name="object_spawner" />
-    <node pkg="ur_robot_gazebo" type="pick_and_place.py" name="pick_and_place_node" />
-    <node pkg="ur_robot_gazebo" type="main_controller" name="main_controller_node" />
+<!--    <node pkg="ur_robot_gazebo" type="ObjectSpawner.py" name="object_spawner" />-->
+<!--    <node pkg="ur_robot_gazebo" type="pick_and_place.py" name="pick_and_place_node" />-->
+<!--    <node pkg="ur_robot_gazebo" type="main_controller" name="main_controller_node" />-->
 
 </launch>

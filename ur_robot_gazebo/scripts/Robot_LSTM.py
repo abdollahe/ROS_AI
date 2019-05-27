@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 from BagToHdf import *
 
+
 seq_len = 4
 input_len = 28
 batch_size = 1
