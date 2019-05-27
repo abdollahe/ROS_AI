@@ -264,6 +264,9 @@ target_link_libraries(arm_position_rosbag_node ${catkin_LIBRARIES} ${GAZEBO_LIBR
 add_executable(main_controller src/MainController.cpp)
 target_link_libraries(main_controller ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
+add_executable(config_file_setup src/ConfigFileSetup.cpp)
+target_link_libraries(config_file_setup ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+
 
 
 ## Create the libSideContactPlugin.so library.

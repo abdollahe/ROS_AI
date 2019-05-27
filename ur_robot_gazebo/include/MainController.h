@@ -18,11 +18,16 @@ using namespace std ;
 class MainController {
 
 public:
+
+    //-----------------------------------------------------------------
+    //----------------------- Public methods --------------------------
+
+    /// Constructor
     MainController() ;
+    /// Desctructor
     ~MainController() ;
 
     void TakeArmToJointState(float joints[] , int dataLength) ;
-
 
     /// @param state -> if true then it pauses the simulation env, if
     /// false then it un pauses the simulation env.
@@ -38,14 +43,11 @@ public:
 
     void TargetObjectDeleteCheckCallback(std_msgs::Bool data) ;
 
-
     float* SetUpTargetPosition() ;
 
     float* SetUpInitJointState() ;
 
-
     void SpawnObject(int type , float position[]) ;
-
 
     void SendRosBagConfig(std::string str) ;
 
@@ -59,15 +61,24 @@ public:
 
     void DeleteTargetObject() ;
 
+    //-----------------------------------------------------------------
+    //----------------------- Public Properties -----------------------
+
+
+    /// Possible states of the system
+    enum States { State0 , State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
+        State8, State9 , State10, State11, State12, State13, State14 , endState };
+
+    /// Variable holding the current state of the system
+    static States state ;
+
+    /// Unique pointer to the ros node handle
+    std::unique_ptr<ros::NodeHandle> rosNode ;
 
     uint32_t iteration = 0 ;
 
-    enum States { State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
-            State8, State9 , State10, State11, State12, State13, State14 , endState };
 
-    static States state ;
 
-    std::unique_ptr<ros::NodeHandle> rosNode ;
 
     bool jointReachedEnd = false ;
 
@@ -77,7 +88,12 @@ public:
     static bool targetExists ;
     static bool enableArmJointConfigDoneSub  ;
 
+
+
 private:
+
+    //-----------------------------------------------------------------
+    //----------------------- Private Properties ----------------------
 
 
     ros::Timer timer ;
@@ -87,25 +103,39 @@ private:
     /// Sends joint states to robot for moving to a joint state
     ros::Publisher armJointPub ;
 
+    /// A ROS publisher to send the position of the target object
     ros::Publisher targetPosePub ;
 
-
+    /// A ROS publisher to send the ROS bag configurations
     ros::Publisher rosConfigPub ;
+
+    /// A ROS publisher to enable or disable the ROS bags (Start logging or stop logging)
     ros::Publisher rosStatePub ;
 
-
+    /// A ROS publisher to enable the magnetic gripper or to disable it
     ros::Publisher startGraspingPub ;
 
+    /// A ROS publisher to request Gazebo to delete the target object
     ros::Publisher deleteTargetPub ;
 
+    /// A ROS service to pause the Gazebo simulation
+    ros::ServiceClient gazeboSimPause ;
+
+    /// A ROS service to unpause the Gazebo simulation
+    ros::ServiceClient gazeboSimUnPause ;
+
+
+
+    ///
     float *target_position ;
 
 
 
 
 
-    /// This value holds the positions of the target cube to be spawned
+    /// This value holds the initial positions of the target cube to be spawned
     float targetPose[3] = {0.5, 0 ,0.05};
+
 
     float targetPosePermutation = 0.001 ;
 
@@ -132,9 +162,6 @@ private:
     int iteration_j3 = 0 ;
 
 
-    ros::ServiceClient gazeboSimPause ;
-
-    ros::ServiceClient gazeboSimUnPause ;
 
 
     ros::Subscriber pickPlaceFinishSub ;
