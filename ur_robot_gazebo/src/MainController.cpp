@@ -261,7 +261,6 @@ void MainController::StartObjectGrasping() {
     pose.quaternion.push_back(0) ;
     pose.quaternion.push_back(0) ;
 
-
     ros::Rate loop_rate(1) ;
     bool ctrl_c = false ;
 
@@ -274,9 +273,6 @@ void MainController::StartObjectGrasping() {
         else
             loop_rate.sleep() ;
     }
-
-
-
 
 
 }

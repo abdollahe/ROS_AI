@@ -11,6 +11,7 @@
 #include "std_msgs/Int32.h"
 #include "std_msgs/Bool.h"
 #include "rosgraph_msgs/Clock.h"
+#include "../include/ConfigFileSetup.h"
 
 
 using namespace std ;
@@ -64,10 +65,9 @@ public:
     //-----------------------------------------------------------------
     //----------------------- Public Properties -----------------------
 
-
     /// Possible states of the system
-    enum States { State0 , State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
-        State8, State9 , State10, State11, State12, State13, State14 , endState };
+    enum States {State0 , State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
+        State8, State9 , State10, State11, State12, State13, State14 , endState};
 
     /// Variable holding the current state of the system
     static States state ;
@@ -75,10 +75,10 @@ public:
     /// Unique pointer to the ros node handle
     std::unique_ptr<ros::NodeHandle> rosNode ;
 
+    /// ConfigClass to read and write config file
+    ConfigClass configClass ;
+
     uint32_t iteration = 0 ;
-
-
-
 
     bool jointReachedEnd = false ;
 
@@ -89,12 +89,10 @@ public:
     static bool enableArmJointConfigDoneSub  ;
 
 
-
 private:
 
     //-----------------------------------------------------------------
     //----------------------- Private Properties ----------------------
-
 
     ros::Timer timer ;
 
@@ -124,18 +122,11 @@ private:
     /// A ROS service to unpause the Gazebo simulation
     ros::ServiceClient gazeboSimUnPause ;
 
-
-
     ///
     float *target_position ;
 
-
-
-
-
     /// This value holds the initial positions of the target cube to be spawned
     float targetPose[3] = {0.5, 0 ,0.05};
-
 
     float targetPosePermutation = 0.001 ;
 
@@ -162,18 +153,12 @@ private:
     int iteration_j3 = 0 ;
 
 
-
-
     ros::Subscriber pickPlaceFinishSub ;
 
     ros::Subscriber armJointConfigDonSub ;
 
-
     ///Subscriber for checking if the target object has been deleted or not
     ros::Subscriber checkTargetDeletedSub ;
-
-
-
 
     ros::Subscriber clockSubsciber ;
 
@@ -183,7 +168,6 @@ private:
     void TimerCallback(const ros::TimerEvent&);
 
     void EndTimeCallback(const ros::TimerEvent&) ;
-
 
 };
 

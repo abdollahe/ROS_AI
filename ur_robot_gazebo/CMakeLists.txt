@@ -67,6 +67,7 @@ find_package(ignition-math4 QUIET)
    JointStateSimple.msg
    PoseMessageSimple.msg
    RosBagConfig.msg
+   SystemConfig.msg
  )
 
 ## Generate services in the 'srv' folder
@@ -264,19 +265,17 @@ target_link_libraries(arm_position_rosbag_node ${catkin_LIBRARIES} ${GAZEBO_LIBR
 add_executable(main_controller src/MainController.cpp)
 target_link_libraries(main_controller ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
-add_executable(config_file_setup src/ConfigFileSetup.cpp)
-target_link_libraries(config_file_setup ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+#add_executable(config_file_setup src/ConfigFileSetup.cpp)
+#target_link_libraries(config_file_setup ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 
 
-## Create the libSideContactPlugin.so library.
-##set(side_contact_plugin_name SideContactPlugin)
-#add_library(ContainPlugin plugins/ContainPlugin.cpp)
-#target_link_libraries(ContainPlugin
-#        ${GAZEBO_LIBRARIES}
-#        ${catkin_LIBRARIES}
-#        )
-#
+add_library(config_file_setup src/ConfigFileSetup.cpp)
+target_link_libraries(config_file_setup
+        ${GAZEBO_LIBRARIES}
+        ${catkin_LIBRARIES}
+        )
+
 ### Create the libObjectDisposalPlugin.so library.
 ###set(object_disposal_plugin_name ObjectDisposalPlugin)
 #add_library(ContainPluginReceiver plugins/ContainPluginReceiver.cpp)
