@@ -263,7 +263,7 @@ add_executable(arm_position_rosbag_node src/ArmTfRosbagNode.cpp)
 target_link_libraries(arm_position_rosbag_node ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 add_executable(main_controller src/MainController.cpp)
-target_link_libraries(main_controller ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+target_link_libraries(main_controller ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} config_file_setup)
 
 #add_executable(config_file_setup src/ConfigFileSetup.cpp)
 #target_link_libraries(config_file_setup ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})

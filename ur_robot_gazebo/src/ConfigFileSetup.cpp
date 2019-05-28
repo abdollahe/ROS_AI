@@ -80,14 +80,14 @@ void ConfigClass::readConfigFile() {
 
     getline(iFile, line);
 
-    i1 = line.find(':') + 2;
+    i1 = line.find(':') + 1;
     last_topic_index = std::stoul(line.substr(i1));
 
     iFile.close();
 }
 
 
-void ConfigClass::writeConfigFile(const double* targetPose , const double* armState , int last_topic_index_sv) {
+void ConfigClass::writeConfigFile(const int* targetPose , const int* armState , int last_topic_index_sv) {
 
       std::stringstream ss ;
 

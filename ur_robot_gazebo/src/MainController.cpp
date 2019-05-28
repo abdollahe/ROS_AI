@@ -12,6 +12,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 
+
 MainController::MainController() {
 
 //    state = 0 ;
@@ -44,6 +45,7 @@ MainController::MainController() {
 
     this->startGraspingPub = this->rosNode->advertise<ur_robot_gazebo::PoseMessageSimple>("/ur_robot/arm_start_grasp" , 1) ;
 
+    this->rosbagNamePub = this->rosNode->advertise<std_msgs::String>("/ur_robot/rosbag_name" , 1) ;
 
     this->rosConfigPub = this->rosNode->advertise<ur_robot_gazebo::RosBagConfig>("/ur_robot/RosbagConfig" , 1) ;
     this->rosStatePub = this->rosNode->advertise<std_msgs::Bool>("/ur_robot/RosbagState" , 1) ;
@@ -121,6 +123,26 @@ void MainController::TakeArmToJointState(float *joints , int dataLength) {
     armJointPub.publish(jointState) ;
     std::cout << "Joint state sent out to robotic arm 2-> " << std::endl ;
 
+
+}
+
+void MainController::SendBagFileName(std::string name) {
+    std_msgs::String msg ;
+    msg.data = name ;
+
+    std::cout << "Latest time for sending is: " << latestTime << endl ;
+
+    ros::Rate loop_rate(10) ;
+    bool ctrl_c = false ;
+
+    while(!ctrl_c) {
+        if(rosbagNamePub.getNumSubscribers() > 0 ) {
+            this->rosbagNamePub.publish(msg) ;
+            ctrl_c = true ;
+        }
+        else
+            loop_rate.sleep() ;
+    }
 
 }
 
@@ -398,6 +420,36 @@ void MainController::ToggleEndTimerState(bool state) {
     }
 }
 
+void MainController::ChangeTargetObjectPose(const int *data) {
+
+    x_direction = *data ;
+    x_targetIteration  = *(data + 1) ;
+    y_direction  = *(data + 2) ;
+    y_targetIteration = *(data + 3) ;
+
+}
+
+void MainController::ChangeArmInitState(const int *data) {
+
+    direction_j1 = *data    ;
+    iteration_j1 = *(data + 1) ;
+    direction_j2 = *(data + 2) ;
+    iteration_j2 = *(data + 3) ;
+    direction_j3 = *(data + 4) ;
+    iteration_j3 = *(data + 5) ;
+
+}
+
+void MainController::ChangeLastTopicIndex(int index) {
+
+}
+
+void MainController::SaveConfigData(int index) {
+    int targetData[4] = {x_direction , x_targetIteration , y_direction , y_targetIteration};
+    int armData[6] = {direction_j1 , iteration_j1 , direction_j2 , iteration_j2 , direction_j3 , iteration_j3};
+    configClass.writeConfigFile(targetData , armData , index) ;
+}
+
 
 MainController::States MainController::state = MainController::State1 ;
 bool MainController::enableArmJointConfigDoneSub = true ;
@@ -412,13 +464,17 @@ bool MainController::targetExists = false ;
 
 int main() {
 
+   MainController mainController ;
 
-    MainController mainController ;
+   ros::Rate loop_rate(2) ;
 
+   mainController.configClass.readConfigFile() ;
 
-    ros::Rate loop_rate(2) ;
+   int j = mainController.configClass.getLastTopicIndex() + 1 ;
+//   int j = 0 ;
 
-   int j = 0 ;
+   mainController.SendBagFileName(std::to_string(j)) ;
+
    for(int i = 0 ; i < mainController.iteration ; i++) {
 
        std::cout << "Performing Stage: " << i << std::endl ;
@@ -430,6 +486,18 @@ int main() {
            float* armInitState ;
 
            switch (MainController::state) {
+
+
+               case MainController::State0:
+               {
+                   std::cout << "In State 1" << std::endl ;
+
+                   mainController.ChangeTargetObjectPose(mainController.configClass.getTargetPos()) ;
+                   mainController.ChangeArmInitState(mainController.configClass.getJointStatePos()) ;
+                   MainController::state = MainController::State1 ;
+               }
+               break ;
+
                ///Change the target position
                case MainController::State1 :
                    {
@@ -443,6 +511,9 @@ int main() {
 
                        else {
                            MainController::state = MainController::endState;
+
+                           mainController.SaveConfigData(0) ;
+
                            mainController.reachedEnd = false ;
                        }
 
@@ -572,7 +643,15 @@ int main() {
 
                }
                    break;
-               case MainController::State14: {
+
+               case MainController::State14:
+               {
+                   std::cout << "In state14 -> Saving the system config" << std::endl ;
+                   mainController.SaveConfigData(j) ;
+                   MainController::state = MainController::State15 ;
+               }
+               break ;
+               case MainController::State15: {
 
                    std::cout << "One sequence done: -> Going to state 2" << std::endl;
                    j++;

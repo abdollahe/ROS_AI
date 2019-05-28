@@ -25,7 +25,7 @@ private:
     /// Holds the target cubes position
     int targetPos[4] ;
     int jointStatePos[6] ;
-    static unsigned long last_topic_index ;
+    unsigned long last_topic_index ;
 
     /// Input stream for reading the config file
     std::ifstream iFile ;
@@ -50,7 +50,7 @@ public:
 
     void readConfigFile() ;
 
-    void writeConfigFile(const double* targetPose , const double* armState , int last_topic_index_sv) ;
+    void writeConfigFile(const int* targetPose , const int* armState , int last_topic_index_sv) ;
 
 
 };

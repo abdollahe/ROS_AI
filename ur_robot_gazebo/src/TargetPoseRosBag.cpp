@@ -17,11 +17,15 @@ private :
     rosbag::Bag bag;
     ros::Subscriber changeStateSub ;
     ros::Subscriber rosBagConfigSub ;
+    ros::Subscriber rosBagNameSub ;
     ros::Subscriber sub ;
 
     std::string topic_name = "target_object_pose" ;
     std::string topic_name_save = "" ;
     ros::Time shiftTime ;
+
+    std::string file_name = "/home/abdollah/Documents/ROSBAGs/targetPose" ;
+    std::string extension = ".bag" ;
 
 public:
     std::unique_ptr<ros::NodeHandle> rosNode ;
@@ -35,8 +39,9 @@ public:
 
         changeStateSub = rosNode->subscribe("/ur_robot/RosbagState" , 1 , &testClass::RosBagStateCallback , this) ;
         rosBagConfigSub = rosNode->subscribe("/ur_robot/RosbagConfig" , 1 , &testClass::RosBagConfigCallback , this) ;
+        rosBagNameSub = rosNode->subscribe("/ur_robot/rosbag_name" , 1 , &testClass::RosBagNameCallback , this) ;
 
-        bag.open("/home/abdollah/Documents/ROSBAGs/targetPose.bag", rosbag::bagmode::Write);
+//        bag.open("/home/abdollah/Documents/ROSBAGs/targetPose.bag", rosbag::bagmode::Write);
 
     }
 
@@ -44,6 +49,10 @@ public:
 
         std::cout << "Closing the bag!!!" << std::endl ;
         bag.close() ;
+    }
+
+    void RosBagNameCallback(const std_msgs::StringPtr &msg_) {
+        bag.open(file_name + "_" + msg_->data + extension, rosbag::bagmode::Write);
     }
 
     void RosBagStateCallback( const std_msgs::BoolPtr &msg_ ) {

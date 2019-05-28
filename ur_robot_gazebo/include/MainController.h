@@ -62,12 +62,23 @@ public:
 
     void DeleteTargetObject() ;
 
+    void ChangeTargetObjectPose(const int * data) ;
+
+    void ChangeArmInitState(const int * data) ;
+
+    void SaveConfigData(int index) ;
+
+    void ChangeLastTopicIndex(int index) ;
+
+    void SendBagFileName(std::string name) ;
+
+
     //-----------------------------------------------------------------
     //----------------------- Public Properties -----------------------
 
     /// Possible states of the system
     enum States {State0 , State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
-        State8, State9 , State10, State11, State12, State13, State14 , endState};
+        State8, State9 , State10, State11, State12, State13, State14 , State15 , endState};
 
     /// Variable holding the current state of the system
     static States state ;
@@ -115,6 +126,9 @@ private:
 
     /// A ROS publisher to request Gazebo to delete the target object
     ros::Publisher deleteTargetPub ;
+
+    /// A ROS publisher to send the new file name to ROSBAGs
+    ros::Publisher rosbagNamePub ;
 
     /// A ROS service to pause the Gazebo simulation
     ros::ServiceClient gazeboSimPause ;
