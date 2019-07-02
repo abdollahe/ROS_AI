@@ -68,6 +68,7 @@ find_package(ignition-math4 QUIET)
    PoseMessageSimple.msg
    RosBagConfig.msg
    SystemConfig.msg
+   BagConfig.msg
  )
 
 ## Generate services in the 'srv' folder

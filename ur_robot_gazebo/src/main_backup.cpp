@@ -1,4 +1,8 @@
 //
+// Created by abdollah on 28/06/19.
+//
+
+//
 // Created by abdollah on 9/04/19.
 //
 
@@ -112,10 +116,7 @@ void MainController::TimerCallback(const ros::TimerEvent &) {
 
 void EndTimeCallback(const boost::system::error_code& /*e*/) {
     std::cout<< "going to the first state of the state machine" << std::endl ;
-
-    MainController::sim_iteration++ ;
     MainController::state = MainController::State2 ;
-
 }
 
 void MainController::SetState(int stateNum) {
@@ -294,6 +295,7 @@ float* MainController::SetUpTargetPosition() {
 
     std::cout << "The y value of the cube is: " << y_value << std::endl ;
 
+
     newTargetPos[0] = x_value ;
     newTargetPos[1] = y_value ;
     newTargetPos[2] = this->targetPose[2] ;
@@ -394,9 +396,9 @@ float* MainController::SetUpInitJointState() {
                     direction_j3 = -1 ;
                 }
                 else if( (direction_j1 == 1) && (direction_j2 == -1) && (direction_j3 == -1) ) { // 1 -1 -1
-                     direction_j1 = -1 ;
-                     direction_j2 = 1  ;
-                     direction_j3 = 1  ;
+                    direction_j1 = -1 ;
+                    direction_j2 = 1  ;
+                    direction_j3 = 1  ;
                 }
                 else if( (direction_j1 == -1) && (direction_j2 == 1) && (direction_j3 == 1) ) { //-1 1 1
                     direction_j3 = -1 ;
@@ -411,8 +413,8 @@ float* MainController::SetUpInitJointState() {
 
                 }
                 else if( (direction_j1 == -1) && (direction_j2 == -1) && (direction_j3 == -1) ) {//-1 -1 -1
-                   direction_j1 = direction_j2 = direction_j3 = 1 ;
-                   this->jointReachedEnd = true ;
+                    direction_j1 = direction_j2 = direction_j3 = 1 ;
+                    this->jointReachedEnd = true ;
                 }
             }
 
@@ -503,245 +505,223 @@ bool MainController::isExecuting = false ;
 
 bool MainController::targetExists = false ;
 
-uint MainController::sim_iteration = 0 ;
-
 int main() {
 
-   MainController mainController ;
+    MainController mainController ;
 
-   ros::Rate loop_rate(2) ;
+    ros::Rate loop_rate(2) ;
 
-   mainController.configClass.readConfigFile() ;
+    mainController.configClass.readConfigFile() ;
 
-   int j = mainController.configClass.getLastTopicIndex() + 1 ;
+    int j = mainController.configClass.getLastTopicIndex() + 1 ;
 //   int j = 0 ;
 
-   mainController.SendBagFileName(std::to_string(j)) ;
+    mainController.SendBagFileName(std::to_string(j)) ;
 
-   for(int i = 0 ; i < mainController.iteration ; i++) {
+    for(int i = 0 ; i < mainController.iteration ; i++) {
 
-       std::cout << "Performing Stage: " << i << std::endl ;
-       MainController::state = MainController::State1 ;
+        std::cout << "Performing Stage: " << i << std::endl ;
+        MainController::state = MainController::State1 ;
 
-       while ( ros::ok() && (MainController::state != MainController::endState)) {
+        while ( ros::ok() && (MainController::state != MainController::endState)) {
 
-           float* targetPose ;
-           float* armInitState ;
+            float* targetPose ;
+            float* armInitState ;
 
-           switch (MainController::state) {
-
-
-               case MainController::State0:
-               {
-                   std::cout << "In State 1" << std::endl ;
-
-                   mainController.ChangeTargetObjectPose(mainController.configClass.getTargetPos()) ;
-                   mainController.ChangeArmInitState(mainController.configClass.getJointStatePos()) ;
-                   MainController::state = MainController::State1 ;
-               }
-               break ;
-
-               ///Change the target position
-               case MainController::State1 :
-                   {
-
-                       std::cout << "In State 1" << std::endl ;
+            switch (MainController::state) {
 
 
-                       if(MainController::max_sim_iteration == MainController::sim_iteration) {
-                           MainController::sim_iteration = 0 ;
-                       }
+                case MainController::State0:
+                {
+                    std::cout << "In State 1" << std::endl ;
 
-
-                       if(!mainController.reachedEnd) {
-                           armInitState = mainController.SetUpInitJointState();
-
-
-                           if(!mainController.jointReachedEnd)
-                           {
-                               MainController::state = MainController::State2 ;
-//                               MainController::enableArmJointConfigDoneSub = true  ;
-                           }
-                           else
-                           {
-
-                               mainController.jointReachedEnd = false ;
-                               MainController::state = MainController::State1 ;
-                           }
-
-                       }
-
-                       else {
-                           MainController::state = MainController::endState;
-
-                           mainController.SaveConfigData(0) ;
-
-                           mainController.reachedEnd = false ;
-                       }
-
-
-                   }
-                   break;
-               /// Set the joint states of the arm
-               case MainController::State2 :
-                   {
-
-                     std::cout << "In State 2" << std::endl ;
-
-                     if(MainController::sim_iteration != MainController::max_sim_iteration) {
-
-                         mainController.ToggleEndTimerState(false) ;
-                         targetPose = mainController.SetUpTargetPosition() ;
-                         std::cout << "The target pose to spawn is: " << *targetPose << " - " << *(targetPose + 1) << " - " << *(targetPose + 2) << std::endl ;
-                         MainController::enableArmJointConfigDoneSub = true  ;
-                         MainController::state = MainController::State3 ;
-                     }
-
-                     else {
-                         MainController::state = MainController::State1 ;
-                     }
-
-
-                   }
-                   break;
-
-               /// Spawn the target object in the desired position
-               case MainController::State3 :
-                   {
-                       std::cout << "In State 3" << std::endl ;
-                       mainController.SpawnObject(0 , targetPose) ;
-                       MainController::state = MainController::State4 ;
-                   }
-                   break;
-
-               /// If the simulation is paused, unpause it.
-               case MainController::State4:
-                   std::cout << "In State 4" << std::endl ;
-                   if(!MainController::isRunning) {
-                       std::cout << "In state 4 - first if check" << std::endl ;
-                       if(mainController.ChangeSimulationState(false)) {
-
-                           std::cout << "In state 4 - second if check" << std::endl ;
-                           MainController::state = MainController::State5 ;
-                           MainController::isRunning = true ;
-                       }
-                   }
-                   else {
-                       MainController::state = MainController::State5 ;
-                   }
-                   break ;
-
-               /// Take the arm to the specified initial joint state
-               case MainController::State5 :
-                   std::cout << "In state 5" << std::endl ;
-                   if(!MainController::isExecuting) {
-                       std::cout << "In state 5 - first if check" << std::endl ;
-                       mainController.TakeArmToJointState(armInitState , 6) ;
-                       MainController::isExecuting = true ;
-                       mainController.ToggleTimerState(true) ;
-                   }
-                   break;
-
-               ///  Pause the simulation and save the time.
-               case MainController::State6 :
-                   std::cout << "In state 6 " << std::endl ;
-                   if(mainController.ChangeSimulationState(true)) {
-                       std::cout << "In state 6 - first if check" << std::endl ;
-                       MainController::state = MainController::State7 ;
-                       MainController::isRunning = false ;
-                   }
-                   break;
-
-               /// Send new topic and time for ROSbags.
-               case MainController::State7:
-                   std::cout << "In state 7" << std::endl ;
-                   mainController.SendRosBagConfig(std::to_string(j)) ;
-                   mainController.ChangeRosBagState(true) ;
-                   MainController::state = MainController::State8 ;
-
-                   break ;
-
-               /// Unpause the simulation
-               case MainController::State8:
-                   std::cout << "In state 8" << std::endl ;
-                   if(mainController.ChangeSimulationState(false)) {
-                       std::cout << "In state 8 - first if check" << std::endl ;
-                       MainController::state = MainController::State9 ;
-                       MainController::isRunning = true ;
-                   }
-                   break ;
-
-               /// Start the pick and place process.
-               case MainController::State9:
-                   std::cout << "In state 9" << std::endl ;
-                   mainController.StartObjectGrasping() ;
-                   MainController::state = MainController::State10 ;
-                   break ;
-
-               /// Wait for the grasping to finish and receive the message on finish
-               case MainController::State10:
-                   std::cout << "In state 10 - waiting for process to finish" << std::endl ;
-                   break ;
-
-               /// Pause the simulation
-               case MainController::State11:
-                   std::cout << "In State 11" << std::endl ;
-                   if(mainController.ChangeSimulationState(true)) {
-                       std::cout << "In state 11 - first if check" << std::endl ;
-                       MainController::state = MainController::State12 ;
-                       MainController::isRunning = false ;
-                   }
-                   break ;
-               /// Stop the ROSbags receiving data and storing (shutdown their subscribers)
-               case MainController::State12:
-                   std::cout << "In state 12" << std::endl ;
-                   mainController.ChangeRosBagState(false) ;
-                   MainController::state = MainController::State13 ;
-                   break ;
-
-               /// Delete the target object
-               case MainController::State13: {
-                   std::cout << "In state 13 - Waiting on target object to be deleted" << std::endl;
-                   mainController.DeleteTargetObject();
-                   MainController::state = MainController::WaitState ;
-
-               }
-                   break;
-
-               case MainController::State14:
-               {
-                   std::cout << "In state14 -> Saving the system config" << std::endl ;
-                   mainController.SaveConfigData(j) ;
-                   MainController::state = MainController::State15 ;
-               }
-               break ;
-               case MainController::State15: {
-
-                   std::cout << "One sequence done: -> Going to state 2" << std::endl;
-                   j++;
-                   //MainController::state = MainController::State2 ;
-                   boost::asio::io_service io;
-                   boost::asio::deadline_timer t(io, boost::posix_time::seconds(5));
-                   t.async_wait(&EndTimeCallback);
-                   io.run();
-               }
+                    mainController.ChangeTargetObjectPose(mainController.configClass.getTargetPos()) ;
+                    mainController.ChangeArmInitState(mainController.configClass.getJointStatePos()) ;
+                    MainController::state = MainController::State1 ;
+                }
                     break ;
-               default :
+
+                    ///Change the target position
+                case MainController::State1 :
+                {
+
+                    std::cout << "In State 1" << std::endl ;
+                    targetPose = mainController.SetUpTargetPosition() ;
+                    std::cout << "The target pose to spawn is: " << *targetPose << " - " << *(targetPose + 1) << " - " << *(targetPose + 2) << std::endl ;
+
+                    if(!mainController.reachedEnd)
+                        MainController::state = MainController::State2 ;
+
+                    else {
+                        MainController::state = MainController::endState;
+
+                        mainController.SaveConfigData(0) ;
+
+                        mainController.reachedEnd = false ;
+                    }
+
+                }
+                    break;
+                    /// Set the joint states of the arm
+                case MainController::State2 :
+                {
+                    std::cout << "In State 2" << std::endl ;
+
+                    mainController.ToggleEndTimerState(false) ;
+
+                    armInitState = mainController.SetUpInitJointState() ;
+
+                    if(!mainController.jointReachedEnd)
+                    {
+                        MainController::state = MainController::State3 ;
+                        MainController::enableArmJointConfigDoneSub = true  ;
+                    }
+                    else
+                    {
+
+                        mainController.jointReachedEnd = false ;
+                        MainController::state = MainController::State1 ;
+                    }
+                }
+                    break;
+
+                    /// Spawn the target object in the desired position
+                case MainController::State3 :
+                {
+                    std::cout << "In State 3" << std::endl ;
+                    mainController.SpawnObject(0 , targetPose) ;
+                    MainController::state = MainController::State4 ;
+                }
+                    break;
+
+                    /// If the simulation is paused, unpause it.
+                case MainController::State4:
+                    std::cout << "In State 4" << std::endl ;
+                    if(!MainController::isRunning) {
+                        std::cout << "In state 4 - first if check" << std::endl ;
+                        if(mainController.ChangeSimulationState(false)) {
+
+                            std::cout << "In state 4 - second if check" << std::endl ;
+                            MainController::state = MainController::State5 ;
+                            MainController::isRunning = true ;
+                        }
+                    }
+                    else {
+                        MainController::state = MainController::State5 ;
+                    }
+                    break ;
+
+                    /// Take the arm to the specified initial joint state
+                case MainController::State5 :
+                    std::cout << "In state 5" << std::endl ;
+                    if(!MainController::isExecuting) {
+                        std::cout << "In state 5 - first if check" << std::endl ;
+                        mainController.TakeArmToJointState(armInitState , 6) ;
+                        MainController::isExecuting = true ;
+                        mainController.ToggleTimerState(true) ;
+                    }
+                    break;
+
+                    ///  Pause the simulation and save the time.
+                case MainController::State6 :
+                    std::cout << "In state 6 " << std::endl ;
+                    if(mainController.ChangeSimulationState(true)) {
+                        std::cout << "In state 6 - first if check" << std::endl ;
+                        MainController::state = MainController::State7 ;
+                        MainController::isRunning = false ;
+                    }
+                    break;
+
+                    /// Send new topic and time for ROSbags.
+                case MainController::State7:
+                    std::cout << "In state 7" << std::endl ;
+                    mainController.SendRosBagConfig(std::to_string(j)) ;
+                    mainController.ChangeRosBagState(true) ;
+                    MainController::state = MainController::State8 ;
+
+                    break ;
+
+                    /// Unpause the simulation
+                case MainController::State8:
+                    std::cout << "In state 8" << std::endl ;
+                    if(mainController.ChangeSimulationState(false)) {
+                        std::cout << "In state 8 - first if check" << std::endl ;
+                        MainController::state = MainController::State9 ;
+                        MainController::isRunning = true ;
+                    }
+                    break ;
+
+                    /// Start the pick and place process.
+                case MainController::State9:
+                    std::cout << "In state 9" << std::endl ;
+                    mainController.StartObjectGrasping() ;
+                    MainController::state = MainController::State10 ;
+                    break ;
+
+                    /// Wait for the grasping to finish and receive the message on finish
+                case MainController::State10:
+                    std::cout << "In state 10 - waiting for process to finish" << std::endl ;
+                    break ;
+
+                    /// Pause the simulation
+                case MainController::State11:
+                    std::cout << "In State 11" << std::endl ;
+                    if(mainController.ChangeSimulationState(true)) {
+                        std::cout << "In state 11 - first if check" << std::endl ;
+                        MainController::state = MainController::State12 ;
+                        MainController::isRunning = false ;
+                    }
+                    break ;
+                    /// Stop the ROSbags receiving data and storing (shutdown their subscribers)
+                case MainController::State12:
+                    std::cout << "In state 12" << std::endl ;
+                    mainController.ChangeRosBagState(false) ;
+                    MainController::state = MainController::State13 ;
+                    break ;
+
+                    /// Delete the target object
+                case MainController::State13: {
+                    std::cout << "In state 13 - Waiting on target object to be deleted" << std::endl;
+                    mainController.DeleteTargetObject();
+                    MainController::state = MainController::WaitState ;
+
+                }
+                    break;
+
+                case MainController::State14:
+                {
+                    std::cout << "In state14 -> Saving the system config" << std::endl ;
+                    mainController.SaveConfigData(j) ;
+                    MainController::state = MainController::State15 ;
+                }
+                    break ;
+                case MainController::State15: {
+
+                    std::cout << "One sequence done: -> Going to state 2" << std::endl;
+                    j++;
+                    //MainController::state = MainController::State2 ;
+                    boost::asio::io_service io;
+                    boost::asio::deadline_timer t(io, boost::posix_time::seconds(5));
+                    t.async_wait(&EndTimeCallback);
+                    io.run();
+                }
+                    break ;
+                default :
 //                   std::cout << "Error in the state machine" << std::endl ;
-                   break;
-           }
+                    break;
+            }
 
-           ros::spinOnce();
+            ros::spinOnce();
 
-           if(MainController::isRunning)
+            if(MainController::isRunning)
                 loop_rate.sleep();
 
-       }
+        }
 
-       std::cout << "---------------------------------------"<< std::endl ;
-       std::cout << "---------------------------------------"<< std::endl ;
-       std::cout << "---------------------------------------"<< std::endl ;
-   }
+        std::cout << "---------------------------------------"<< std::endl ;
+        std::cout << "---------------------------------------"<< std::endl ;
+        std::cout << "---------------------------------------"<< std::endl ;
+    }
 
 
 

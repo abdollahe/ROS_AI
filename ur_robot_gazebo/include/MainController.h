@@ -12,6 +12,7 @@
 #include "std_msgs/Bool.h"
 #include "rosgraph_msgs/Clock.h"
 #include "../include/ConfigFileSetup.h"
+#include <cstdlib>
 
 
 using namespace std ;
@@ -72,16 +73,23 @@ public:
 
     void SendBagFileName(std::string name) ;
 
+    float GenerateRandomValue(float lowRange , float highRange) ;
 
     //-----------------------------------------------------------------
     //----------------------- Public Properties -----------------------
 
     /// Possible states of the system
     enum States {State0 , State1 , State2 , State3 , State4 , State5 , State6 , State7 ,
-        State8, State9 , State10, State11, State12, State13, State14 , State15 , endState};
+        State8, State9 , State10, State11, State12, State13, State14 , WaitState , State15 , endState};
 
     /// Variable holding the current state of the system
     static States state ;
+
+    /// Number holding the simulation iteration number
+    static uint sim_iteration ;
+
+    /// Maximum number of simulation iterations to run for one set of parameter changes
+    static const uint max_sim_iteration = 1000 ;
 
     /// Unique pointer to the ros node handle
     std::unique_ptr<ros::NodeHandle> rosNode ;

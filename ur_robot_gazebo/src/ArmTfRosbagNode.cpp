@@ -28,8 +28,12 @@ private :
     std::string topic_name_save = "" ;
     ros::Time shiftTime ;
 
-    std::string file_name = "/home/abdollah/Documents/ROSBAGs/targetPose" ;
+    std::string file_name = "/home/abdollah/Documents/ROSBAGs/armPose" ;
     std::string extension = ".bag" ;
+
+    std::string bag_path = "" ;
+    std::string file_name2 = "arm_Pose" ;
+
 
 public:
     std::unique_ptr<ros::NodeHandle> rosNode ;
@@ -55,6 +59,7 @@ public:
     }
 
     void RosBagNameCallback(const std_msgs::StringPtr &msg_) {
+
         bag.open(file_name + "_" + msg_->data + extension, rosbag::bagmode::Write);
     }
 

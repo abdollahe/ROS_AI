@@ -27,6 +27,8 @@ private:
     int jointStatePos[6] ;
     unsigned long last_topic_index ;
 
+
+    
     /// Input stream for reading the config file
     std::ifstream iFile ;
 

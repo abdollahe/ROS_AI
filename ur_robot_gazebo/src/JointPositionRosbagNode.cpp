@@ -79,7 +79,6 @@ public:
         timeToSave.nsec = duration.nsec ;
         timeToSave.sec = duration.sec ;
 
-
         std::cout << "shift time is: " << shiftTime <<std::endl ;
         std::cout << "time to save is : " << timeToSave << std::endl ;
 

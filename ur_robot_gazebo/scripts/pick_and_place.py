@@ -26,7 +26,6 @@ class PickAndPlace:
 
     target_pose = geometry_msgs.msg.Pose()
 
-
     def __init__(self):
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node('simple_pick_place', anonymous=True)
@@ -40,6 +39,7 @@ class PickAndPlace:
 
 
         #self.go_to_joint(self.joint_wait)
+
 
     def arm_joint_state_callback(self, data):
         target_joint_state = data.joint_angles
@@ -64,7 +64,8 @@ class PickAndPlace:
         self.move_to_target()
 
         self.grasp_object()
-        self.move_from_target_to_goal()
+        # self.move_from_target_to_goal()
+        self.move_from_target_to_goal2()
         self.release_object()
         self.move_to_wait()
 
@@ -170,7 +171,7 @@ class PickAndPlace:
         # Send the goal to the action server.
         self.robot1_client.send_goal(robot1_goal)
         res = False
-        for i in range(0,5):
+        for i in range(0, 5):
             res = self.robot1_client.wait_for_result()
             if res:
                 rospy.loginfo("Goal executed - Move to target , proceeding to the next goal")
@@ -221,6 +222,109 @@ class PickAndPlace:
             rospy.loginfo("Goal executed - Move to pose , proceeding to the next goal")
         elif res == 1:
             rospy.loginfo("Goal is being executed - Move to Pose, waiting to finish to proceed")
+
+
+    def move_from_target_to_goal2(self):
+        #  ## Cartesian Paths
+        # ## ^^^^^^^^^^^^^^^
+        # ## You can plan a cartesian path directly by specifying a list of waypoints
+        # ## for the end-effector to go through.
+        waypoints = []
+        # start with the current pose
+        current_pose = self.robot_group.get_current_pose()
+        rospy.sleep(0.5)
+        current_pose = self.robot_group.get_current_pose()
+
+        # create linear offsets to the current pose
+        new_eef_pose = geometry_msgs.msg.Pose()
+        new_eef_pose2 = geometry_msgs.msg.Pose()
+        new_eef_pose3 = geometry_msgs.msg.Pose()
+        new_eef_pose4 = geometry_msgs.msg.Pose()
+        # Manual offsets because we don't have a camera to detect objects yet.
+        new_eef_pose.position.x = current_pose.pose.position.x
+        new_eef_pose.position.y = current_pose.pose.position.y
+        new_eef_pose.position.z = current_pose.pose.position.z + 0.30
+
+        # Retain orientation of the current pose.
+        new_eef_pose.orientation = copy.deepcopy(current_pose.pose.orientation)
+
+        waypoints.append(new_eef_pose)
+
+
+        # --------------------------------------------
+        # ---------------------------------------------
+
+
+        # new_eef_pose2.position.x = new_eef_pose.position.x - 0.2
+        # new_eef_pose2.position.y = new_eef_pose.position.y + 0.2
+        # new_eef_pose2.position.z = new_eef_pose.position.z
+        #
+        # # Retain orientation of the current pose.
+        # new_eef_pose2.orientation = copy.deepcopy(new_eef_pose.orientation)
+        #
+        # waypoints.append(new_eef_pose2)
+        #
+        # new_eef_pose3.position.x = new_eef_pose2.position.x - 0.2
+        # new_eef_pose3.position.y = new_eef_pose2.position.y + 0.2
+        # new_eef_pose3.position.z = new_eef_pose2.position.z + 0.2
+        #
+        # # Retain orientation of the current pose.
+        # new_eef_pose3.orientation = copy.deepcopy(new_eef_pose2.orientation)
+        #
+        # waypoints.append(new_eef_pose3)
+        #
+        # pose_goal = geometry_msgs.msg.Pose()
+        # pose_goal.orientation.w = 0.00802366832289
+        # pose_goal.orientation.x = 0.883899607609
+        # pose_goal.orientation.y = -0.467562344368
+        # pose_goal.orientation.z = -0.00652369106187
+        # pose_goal.position.x = -0.082724855514
+        # pose_goal.position.y = 0.582823716523
+        # pose_goal.position.z = 0.582901434879
+        # waypoints.append(pose_goal)
+
+        # --------------------------------------------
+        # ---------------------------------------------
+        pose_goal = geometry_msgs.msg.Pose()
+
+        pose_goal.orientation.w = 0.00802366832289
+        pose_goal.orientation.x = 0.883899607609
+        pose_goal.orientation.y = -0.467562344368
+        pose_goal.orientation.z = -0.00652369106187
+        pose_goal.position.x = -0.082724855514
+        pose_goal.position.y = 0.782823716523
+        pose_goal.position.z = 0.382901434879
+
+
+        # new_eef_pose4.position.x = pose_goal.position.x
+        # new_eef_pose4.position.y = pose_goal.position.y + 0.2
+        # new_eef_pose4.position.z = pose_goal.position.z - 0.2
+        #
+        # # Retain orientation of the current pose.
+        # new_eef_pose4.orientation = copy.deepcopy(pose_goal.orientation)
+
+        waypoints.append(pose_goal)
+        # waypoints.append(current_pose.pose)
+
+        # We want the cartesian path to be interpolated at a resolution of 1 cm
+        # which is why we will specify 0.01 as the eef_step in cartesian
+        # translation.  We will specify the jump threshold as 0.0, effectively
+        # disabling it.
+        fraction = 0.0
+        for count_cartesian_path in range(0, 10):
+            if fraction < 1.0:
+                (plan_cartesian, fraction) = self.robot_group.compute_cartesian_path(
+                    waypoints,  # waypoints to follow
+                    0.01,  # eef_step
+                    0.0)  # jump_threshold
+            else:
+                break
+        rospy.loginfo("fraction is: " + str(fraction))
+        robot1_goal = moveit_msgs.msg.ExecuteTrajectoryGoal()
+        robot1_goal.trajectory = plan_cartesian
+
+        self.robot1_client.send_goal(robot1_goal)
+        self.robot1_client.wait_for_result()
 
     def move_from_target_to_goal(self):
         #  ## Cartesian Paths

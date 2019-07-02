@@ -26,6 +26,7 @@ class ObjectSpawner:
 
         rospy.init_node("object_spawner")
         # rospy.wait_for_service("gazebo/delete_model")
+
         rospy.wait_for_service("gazebo/spawn_sdf_model")
 
         self.add_object = rospy.ServiceProxy("gazebo/spawn_sdf_model", SpawnModel)

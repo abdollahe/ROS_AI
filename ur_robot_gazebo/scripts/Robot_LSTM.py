@@ -4,7 +4,6 @@ import tensorflow as tf
 from tensorflow.contrib import rnn
 from BagToHdf import *
 
-
 seq_len = 4
 input_len = 28
 batch_size = 1
@@ -23,7 +22,8 @@ test_num_ratio = 0.125
 f = h5py.File('/home/abdollah/Documents/training_data.hdf5', 'a')
 data = obtain_training_set(f)
 
-
+# --------------------------------------------------------
+# --------------------------------------------------------
 # Create the training data and the labels from the corpus.
 train_data = []
 train_labels = []
@@ -38,7 +38,6 @@ for e in range(0, num_of_runs):
             if j == 3:
                 train_labels.append(data[e, i + j + 1, :])
         train_data.append(temp)
-
 
 num_of_test_data = int(len(train_data) * test_num_ratio)
 num_of_training_data = len(train_data) - num_of_test_data
@@ -60,7 +59,6 @@ print("test data length -> " + str(len(test_data)))
 print("train labels length -> " + str(len(train_labels)))
 print("test labels length -> " + str(len(test_labels)))
 
-
 # ------------------------------------------------
 # ------------------------------------------------
 # This section is related to the implementation of the LSTM model
@@ -71,28 +69,26 @@ target = tf.placeholder(tf.float64, [None, input_len])
 
 print_target = tf.Print(target, [target] , "This is:")
 
-
 # Initialize an LSTM cell
 num_hidden = 128
 
 cell = rnn.LSTMCell(num_hidden, state_is_tuple=True)
 
-
 # Create the computation graph
 
 val, state = tf.nn.dynamic_rnn(cell, data, dtype=tf.float64)
 
+
 val = tf.transpose(val, [1, 0, 2])
 last = tf.gather(val, int(val.get_shape()[0]) - 1)
 
-
-weight = tf.Variable(tf.truncated_normal([num_hidden, int(target.get_shape()[1])] , dtype=tf.float64) , dtype=tf.float64)
+weight = tf.Variable(tf.truncated_normal([num_hidden, int(target.get_shape()[1])], dtype=tf.float64), dtype=tf.float64)
 bias = tf.Variable(tf.constant(0.1, shape=[target.get_shape()[1]], dtype=tf.float64 ), dtype=tf.float64)
 
 # --- This is the prediction phase -> We have to find out what type we will use or in other words
 # how will ours be predicted!!!!
 prediction = tf.matmul(last, weight) + bias
-prediction_print = tf.Print(prediction , [prediction] , "prediction is: ")
+prediction_print = tf.Print(prediction, [prediction], "prediction is: ")
 
 cross_entropy = -tf.reduce_sum(target * tf.log(prediction))
 # cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(logits=prediction, labels=target)
@@ -110,7 +106,6 @@ init_op = tf.initialize_all_variables()
 sess = tf.Session()
 print("Started session")
 sess.run(init_op)
-
 
 no_of_batches = int(len(train_data)/batch_size)
 epoch = 250

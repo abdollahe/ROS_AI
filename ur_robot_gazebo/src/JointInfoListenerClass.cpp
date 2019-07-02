@@ -2,6 +2,8 @@
 // Created by abdollah on 7/04/19.
 //
 
+#include <StampedJointVelocity.h>
+#include <StampedJointPosition.h>
 #include "../include/JointInfoListenerClass.h"
 
 
