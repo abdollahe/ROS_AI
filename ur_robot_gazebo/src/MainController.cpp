@@ -286,11 +286,11 @@ float* MainController::SetUpTargetPosition() {
 
     static float newTargetPos[3] = {0.0 , 0.0 , 0.0};
 
-    float x_value = GenerateRandomValue(-0.75f , 0.75f) ;
+    float x_value = GenerateRandomValue(0.3f , 0.75f) ;
 
     std::cout << "The x value of the cube is: " << x_value << std::endl ;
 
-    float y_value = GenerateRandomValue(-0.25f , 0.25f) ;
+    float y_value = GenerateRandomValue(-0.75f , 0.3f) ;
 
     std::cout << "The y value of the cube is: " << y_value << std::endl ;
 
