@@ -53,7 +53,8 @@ class VerifyData:
         return f[group_list[0]].value , f[group_list[1]].value
 
     def setup_data(self):
-        with h5py.File('/home/abdollah/Documents/verify_training_set_long.hdf5', 'a') as f:
+        # with h5py.File('/home/abdollah/Documents/training_data_long2.hdf5', 'a') as f:
+        with h5py.File('/home/abdollah/Documents/training_data_short.hdf5', 'a') as f:
 
             self.eTimestep_list, self.data = self.obtain_training_set(f)
 

@@ -22,14 +22,21 @@ file_stem_name = ["armPose",
 
 # root path to search for bag files.
 root_path = "/home/abdollah/Documents/ROSBAGs"
+# root_path = "/home/abdollah/Documents/rosbag_archive/New_v1"
+# root_path = "/home/abdollah/Documents/rosbag_archive/Archive"
 
-hdf_file_path = '/home/abdollah/Documents/verify_training_set_long.hdf5'
+# hdf_file_path = '/home/abdollah/Documents/New_HDF/Long/training_data_long.hdf5'
+# hdf_file_path = '/home/abdollah/Documents/New_HDF/Short/training_data_short.hdf5'
+hdf_file_path = '/home/abdollah/Documents/New_HDF/Med/training_data_medium.hdf5'
+
+
+
 
 # -------------------------------------------------------------------- #
 # -------------------------------------------------------------------- #
 
 
-class BagToHdf :
+class BagToHdf:
 
     # search path
     root_path = ""
@@ -483,7 +490,7 @@ if __name__ == '__main__':
 
         # data_list = obj.trim_data_set(data_list)
 
-        data_list = obj.filter_data_set(data_list, 100, 250)
+        data_list = obj.filter_data_set(data_list, 60, 90)
 
         if len(data_list) > 0:
             data_array, second = obj.convert_to_numpy(data_list)
