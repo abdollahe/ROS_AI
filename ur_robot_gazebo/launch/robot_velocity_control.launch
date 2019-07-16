@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <!-- Configure sim environment -->
+    <arg name="limited" default="false"/>
+    <arg name="paused" default="true"/>s
+    <arg name="gui" default="true"/>
+    <arg name="debug" default="false" />
+    <arg name="sim" default="true" />
+
+    <!-- Load Sim Environment -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find ur_robot_gazebo)/worlds/ur_robot_world.world"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="verbose" value="true" />
+    </include>
+
+    <!-- Include UR5 -->
+    <include file="$(find ur_robot)/launch/ur_upload.launch">
+        <arg name="limited" value="$(arg limited)"/>
+    </include>
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+          args="-urdf -param robot_description -model robot -z 0.01 -J shoulder_lift_joint -1.5707
+           -J elbow_joint 1.5707 -J wrist_1_joint -1.5707 -J wrist_2_joint -1.5707  -unpause"/>
+    <include file="$(find ur_gazebo)/launch/controller_utils.launch"/>
+
+    <!-- Load controllers -->
+    <rosparam command="load" file="$(find ur_robot_gazebo)/config/velocity_controllers.yaml"/>
+
+    <!-- Controllers -->
+<!--    <node name="controller_spawner" pkg="controller_manager" type="spawner"-->
+<!--          respawn="false" output="screen"-->
+<!--          args="-->
+<!--            joint1_position_controller-->
+<!--            joint2_position_controller-->
+<!--            joint3_position_controller-->
+<!--            joint4_position_controller-->
+<!--            joint5_position_controller-->
+<!--            joint6_position_controller-->
+<!--            &#45;&#45;timeout 60">-->
+<!--    </node>-->
+
+    <!-- Spawn the controllers -->
+    <node name="controller_spawner"
+          pkg="controller_manager"
+          type="spawner"
+          respawn="false"
+          output="screen"
+          args="ur_traj_controller" />
+
+<!--    <node name="controller_spawner"-->
+<!--          pkg="controller_manager"-->
+<!--          type="spawner"-->
+<!--          respawn="false"-->
+<!--          output="screen"-->
+<!--          args="joint1_velocity_controller-->
+<!--                joint2_velocity_controller-->
+<!--                joint3_velocity_controller-->
+<!--                joint4_velocity_controller-->
+<!--                joint5_velocity_controller-->
+<!--                joint6_velocity_controller" />-->
+
+
+</launch>

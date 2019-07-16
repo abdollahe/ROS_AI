@@ -22,7 +22,7 @@ class PickAndPlace:
 
     move_to_joint_done_pub = None
 
-    pick_and_place_done_pub = None ;
+    pick_and_place_done_pub = None
 
     target_pose = geometry_msgs.msg.Pose()
 
@@ -37,9 +37,7 @@ class PickAndPlace:
 
         self.pick_and_place_done_pub = rospy.Publisher("/ur_robot/pick_place_finish", Int32, queue_size=1)
 
-
         #self.go_to_joint(self.joint_wait)
-
 
     def arm_joint_state_callback(self, data):
         target_joint_state = data.joint_angles
@@ -165,6 +163,7 @@ class PickAndPlace:
         plan = self.robot_group.plan()
         # Create a goal message object for the action server.
         robot1_goal = moveit_msgs.msg.ExecuteTrajectoryGoal()
+
         # Update the trajectory in the goal message.
         robot1_goal.trajectory = plan
 
@@ -207,10 +206,15 @@ class PickAndPlace:
 
         self.robot_group.set_pose_target(goalpose)
 
+
+
         # Plan to the desired joint-space goal using the default planner (RRTConnect).
         plan = self.robot_group.plan()
         # Create a goal message object for the action server.
         robot1_goal = moveit_msgs.msg.ExecuteTrajectoryGoal()
+
+
+
         # Update the trajectory in the goal message.
         robot1_goal.trajectory = plan
 
@@ -250,10 +254,8 @@ class PickAndPlace:
 
         waypoints.append(new_eef_pose)
 
-
         # --------------------------------------------
         # ---------------------------------------------
-
 
         # new_eef_pose2.position.x = new_eef_pose.position.x - 0.2
         # new_eef_pose2.position.y = new_eef_pose.position.y + 0.2
@@ -430,6 +432,8 @@ class PickAndPlace:
 
     def move_to_wait(self):
         self.robot_group.set_named_target("wait")
+
+
 
         # Plan to the desired joint-space goal using the default planner (RRTConnect).
         plan = self.robot_group.plan()

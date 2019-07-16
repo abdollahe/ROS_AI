@@ -12,6 +12,8 @@
 #include "../include/RosBagConfig.h"
 
 
+
+
 class testClass {
 private :
     rosbag::Bag bag;
@@ -110,7 +112,6 @@ int main(int argv , char ** argc) {
   //ros::Subscriber sub = node.subscribe("/objectPosePlugin/ObjectPose" , 100 , TargetPoseCallback) ;
   testClass myClass ;
   ros::spin() ;
-
 
 
 
