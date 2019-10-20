@@ -58,11 +58,13 @@
     <param name="bin" command="$(find xacro)/xacro.py '$(find ur_robot)/urdf/small_bin/bin.urdf'" />
 
     <!-- Spawn URDF objects into Gazebo -->
+    <!-- Position of bin for UR5 -> -x 0.0 -y -0.75 -z 0.1 -->
+    <!-- Position of bin for UR3 -x 0.0 -y -0.45 -z 0.1 -->
     <node name="spawn_bin"
           pkg="gazebo_ros"
           type="spawn_model"
           output="screen"
-          args="-urdf -param bin -x 0. -y 0.75 -z 0.1 -model bin_1" />
+          args="-urdf -param bin -x 0. -y -0.45 -z 0.1 -model bin_1" />
 
 
     <include file="$(find ur_robot_gazebo)/launch/start_rosbag_nodes.launch"/>

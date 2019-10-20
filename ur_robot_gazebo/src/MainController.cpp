@@ -286,11 +286,16 @@ float* MainController::SetUpTargetPosition() {
 
     static float newTargetPos[3] = {0.0 , 0.0 , 0.0};
 
-    float x_value = GenerateRandomValue(0.3f , 0.75f) ;
+    // When using UR5 the lowRange is 0.3f and the highRange is 0.75f
+    // When using ur3 the lowRange is 0.2f and the highRange is 0.4f
+
+    float x_value = GenerateRandomValue(0.2f , 0.4f) ;
 
     std::cout << "The x value of the cube is: " << x_value << std::endl ;
 
-    float y_value = GenerateRandomValue(-0.75f , 0.3f) ;
+    // When using UR5 the lowRange is -0.3f and the highRange is 0.75f
+    // When using ur3 the lowRange is -0.15f and the highRange is 0.4f
+    float y_value = GenerateRandomValue(-0.15f , 0.4f) ;
 
     std::cout << "The y value of the cube is: " << y_value << std::endl ;
 

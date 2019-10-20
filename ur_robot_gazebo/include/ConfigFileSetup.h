@@ -11,7 +11,8 @@
 #include <std_msgs/String.h>
 #include "ros/ros.h"
 #include <thread>
-#include "../include/SystemConfig.h"
+//#include "../include/SystemConfig.h"
+
 
 #ifndef SRC_CONFIGCLASS_H
 #define SRC_CONFIGCLASS_H

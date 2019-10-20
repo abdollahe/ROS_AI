@@ -60,7 +60,6 @@ class PickAndPlace:
         print("I am in the grasping callback")
 
         self.move_to_target()
-
         self.grasp_object()
         # self.move_from_target_to_goal()
         self.move_from_target_to_goal2()
@@ -206,14 +205,10 @@ class PickAndPlace:
 
         self.robot_group.set_pose_target(goalpose)
 
-
-
         # Plan to the desired joint-space goal using the default planner (RRTConnect).
         plan = self.robot_group.plan()
         # Create a goal message object for the action server.
         robot1_goal = moveit_msgs.msg.ExecuteTrajectoryGoal()
-
-
 
         # Update the trajectory in the goal message.
         robot1_goal.trajectory = plan
@@ -226,7 +221,6 @@ class PickAndPlace:
             rospy.loginfo("Goal executed - Move to pose , proceeding to the next goal")
         elif res == 1:
             rospy.loginfo("Goal is being executed - Move to Pose, waiting to finish to proceed")
-
 
     def move_from_target_to_goal2(self):
         #  ## Cartesian Paths
@@ -247,12 +241,14 @@ class PickAndPlace:
         # Manual offsets because we don't have a camera to detect objects yet.
         new_eef_pose.position.x = current_pose.pose.position.x
         new_eef_pose.position.y = current_pose.pose.position.y
-        new_eef_pose.position.z = current_pose.pose.position.z + 0.30
+        new_eef_pose.position.z = current_pose.pose.position.z + 0.2
 
         # Retain orientation of the current pose.
         new_eef_pose.orientation = copy.deepcopy(current_pose.pose.orientation)
 
         waypoints.append(new_eef_pose)
+
+
 
         # --------------------------------------------
         # ---------------------------------------------
@@ -289,14 +285,23 @@ class PickAndPlace:
         # ---------------------------------------------
         pose_goal = geometry_msgs.msg.Pose()
 
-        pose_goal.orientation.w = 0.00802366832289
-        pose_goal.orientation.x = 0.883899607609
-        pose_goal.orientation.y = -0.467562344368
-        pose_goal.orientation.z = -0.00652369106187
-        pose_goal.position.x = -0.082724855514
-        pose_goal.position.y = 0.782823716523
-        pose_goal.position.z = 0.382901434879
+        # Position data for using UR5
+        # pose_goal.orientation.w = 0.00802366832289
+        # pose_goal.orientation.x = 0.883899607609
+        # pose_goal.orientation.y = -0.467562344368
+        # pose_goal.orientation.z = -0.00652369106187
+        # pose_goal.position.x = -0.082724855514
+        # pose_goal.position.y = -0.782823716523
+        # pose_goal.position.z = 0.382901434879
 
+        # Position data for using UR3
+        pose_goal.orientation.w = 0.000507206539272
+        pose_goal.orientation.x = -0.000448392620936
+        pose_goal.orientation.y = 0.999998460513
+        pose_goal.orientation.z = 0.00161884413662
+        pose_goal.position.x = 0.112665371018
+        pose_goal.position.y = -0.398839165625
+        pose_goal.position.z = 0.363467605984
 
         # new_eef_pose4.position.x = pose_goal.position.x
         # new_eef_pose4.position.y = pose_goal.position.y + 0.2

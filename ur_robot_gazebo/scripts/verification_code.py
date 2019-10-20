@@ -11,6 +11,7 @@ import random
 import string
 from gazebo_msgs.srv import *
 
+
 class VerifyData:
 
     data = None
@@ -24,11 +25,15 @@ class VerifyData:
 
     targetName = ""
 
+    goalName = ""
+
     add_object = None
 
     delete_object = None
 
-    def __init__(self):
+    source_path =""
+
+    def __init__(self , src_path):
         print("Class Created")
 
         moveit_commander.roscpp_initialize(sys.argv)
@@ -37,7 +42,8 @@ class VerifyData:
         self.robot_group = moveit_commander.MoveGroupCommander("robot")
 
         self.current_episode = 0
-        self.sampling_percentage = 10
+        self.sampling_percentage = 1
+        self.source_path = src_path
 
     def obtain_training_set(self, f):
         """
@@ -50,11 +56,10 @@ class VerifyData:
         group_list = list(f.keys())
         n = len(group_list)
 
-        return f[group_list[0]].value , f[group_list[1]].value
+        return f[group_list[0]].value, f[group_list[1]].value
 
     def setup_data(self):
-        # with h5py.File('/home/abdollah/Documents/training_data_long2.hdf5', 'a') as f:
-        with h5py.File('/home/abdollah/Documents/training_data_short.hdf5', 'a') as f:
+        with h5py.File(self.source_path, 'a') as f:
 
             self.eTimestep_list, self.data = self.obtain_training_set(f)
 
@@ -65,7 +70,13 @@ class VerifyData:
 
     def get_next_dataset(self):
 
-        data_length = self.eTimestep_list[self.current_episode]
+        rand_index = random.randint(0, self.num_episodes - 1)
+
+        rand_index = 823
+
+        print("the episode that has been fetched is number: " + str(rand_index))
+
+        data_length = self.eTimestep_list[rand_index]
 
         temp_list = self.eTimestep_list[:self.current_episode]
 
@@ -73,17 +84,20 @@ class VerifyData:
 
         return_matrix_angles = np.zeros(shape=(int(math.floor(len(temp_data) / self.sampling_percentage)), 6))
         return_matrix_cube = np.zeros(shape=(int(math.floor(len(temp_data) / self.sampling_percentage)), 6))
+        # return_matrix_red_cube = np.zeros(shape=(1, 6))
 
-        for i in range(0 , int(math.floor(len(temp_data) / self.sampling_percentage))):
+        for i in range(0, int(math.floor(len(temp_data) / self.sampling_percentage))):
             return_matrix_angles[i] = temp_data[i * self.sampling_percentage][19:25]
             return_matrix_cube[i] = temp_data[i * self.sampling_percentage][12:18]
+
+        # return_matrix_red_cube = temp_data[int(math.floor(len(temp_data) / self.sampling_percentage)),  ]
 
         if self.current_episode != (self.num_episodes - 1):
             self.current_episode += 1
         else:
             self.current_episode = 0
 
-        return return_matrix_angles , return_matrix_cube
+        return return_matrix_angles, return_matrix_cube
 
     def randomString(self):
         stringLength = 20
@@ -92,25 +106,36 @@ class VerifyData:
         rand = ''.join(random.choice(letters) for i in range(stringLength))
         return rand
 
-    def spawn_object(self , position):
-
-        modelpath = "/home/abdollah/ros_ws/src/UR_Robot_AI/ur_robot/models/green_brick/green_brick.sdf"
+    def spawn_object(self, position, model_path , cube_type):
 
         orient = Quaternion(*tf.transformations.quaternion_from_euler(0, 0, 0))
         object_pose = Pose(Point(position[0], position[1], position[2]), orient)
 
-        with open(modelpath, "r") as f:
+        with open(model_path, "r") as f:
             model = f.read()
-        self.targetName = ""
-        # print(model)
-        self.targetName = "cube" + self.randomString()
-        print("Model name for spawn is: " + self.targetName)
+        if cube_type == "target":
+            self.targetName = ""
+            # print(model)
+            self.targetName = "cube_green_" + self.randomString()
+            print("Model name for spawn is: " + self.targetName)
 
-        rospy.wait_for_service("gazebo/spawn_sdf_model")
+            rospy.wait_for_service("gazebo/spawn_sdf_model")
 
-        self.add_object = rospy.ServiceProxy("gazebo/spawn_sdf_model", SpawnModel)
+            self.add_object = rospy.ServiceProxy("gazebo/spawn_sdf_model", SpawnModel)
 
-        print(self.add_object(self.targetName, model, "", object_pose, "world"))
+            print(self.add_object(self.targetName, model, "", object_pose, "world"))
+
+        elif cube_type == "goal":
+            self.goalName = ""
+            # print(model)
+            self.goalName = "cube_red_" + self.randomString()
+            print("Model name for spawn is: " + self.goalName)
+
+            rospy.wait_for_service("gazebo/spawn_sdf_model")
+
+            self.add_object = rospy.ServiceProxy("gazebo/spawn_sdf_model", SpawnModel)
+
+            print(self.add_object(self.goalName, model, "", object_pose, "world"))
 
     def delete_cube(self):
         rospy.wait_for_service("gazebo/delete_model")
@@ -141,21 +166,32 @@ class VerifyData:
 
 if __name__ == "__main__":
 
-    obj = VerifyData()
+    path_issues_long= '/home/abdollah/Documents/New_HDF/Issues/issues_long.hdf5'
+    path_issues_medium = '/home/abdollah/Documents/New_HDF/Issues/issues_medium.hdf5'
+    path_issues_short = '/home/abdollah/Documents/New_HDF/Issues/issues_short.hdf5'
+
+    path_clean_long = '/home/abdollah/Documents/New_HDF/Cleaned/clean_long.hdf5'
+    path_clean_medium = '/home/abdollah/Documents/New_HDF/Cleaned/clean_medium.hdf5'
+    path_clean_short = '/home/abdollah/Documents/New_HDF/Cleaned/clean_short.hdf5'
+
+    green_cube_model = "/home/abdollah/ros_ws/src/UR_Robot_AI/ur_robot/models/green_brick/green_brick.sdf"
+    red_cube_model = "/home/abdollah/ros_ws/src/UR_Robot_AI/ur_robot/models/red_brick/red_brick.sdf"
+
+    obj = VerifyData(path_clean_long)
 
     obj.setup_data()
 
     temp_d, cube_pose = obj.get_next_dataset()
-    temp_d, cube_pose = obj.get_next_dataset()
-    temp_d, cube_pose = obj.get_next_dataset()
-    temp_d, cube_pose = obj.get_next_dataset()
-    temp_d, cube_pose = obj.get_next_dataset()
+    # temp_d, cube_pose = obj.get_next_dataset()
+    # temp_d, cube_pose = obj.get_next_dataset()
+    # temp_d, cube_pose = obj.get_next_dataset()
+    # temp_d, cube_pose = obj.get_next_dataset()
 
-    obj.spawn_object(cube_pose[0])
+    obj.spawn_object(cube_pose[0], green_cube_model, "target")
+
+    obj.spawn_object(cube_pose[len(cube_pose) - 1], red_cube_model, "goal")
 
     for i in range(0, len(temp_d)):
-
-
         d12 = temp_d[i]
 
         obj.plan_joint_goal(d12)

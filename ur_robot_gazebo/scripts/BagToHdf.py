@@ -55,7 +55,7 @@ def create_training_data(datasetLength, min_val):
         mainData = []
 
         data1 = []
-        bag = rosbag.Bag( path + '/armPose.bag')
+        bag = rosbag.Bag(path + '/armPose.bag')
 
         for topic, msg, t in bag.read_messages(topics=[arm_pose_topic_name + "_" + str(min_val + n)]):
             #print msg
@@ -195,8 +195,6 @@ def create_training_data(datasetLength, min_val):
         bag.close()
 
         # --------------------------------------------------------------------
-
-
 
         print(arrayLength)
 

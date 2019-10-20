@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     # model_paths = "/home/abdollah/catkin_ws/src/robot_skill_transfer/schunk_train_data_gen/models"
     # model_paths = "/home/abdollah/catkin_ws/src/skill_transfer/ur_robot/models/green_brick"
-    # model_name ="green_brick.sdf"
+    # model_name ="red_brick.sdf"
 
     rospy.init_node("gazebo_sim_reset")
     # rospy.wait_for_service("gazebo/delete_model")

@@ -21,13 +21,15 @@ file_stem_name = ["armPose",
                   "targetPose"]
 
 # root path to search for bag files.
-root_path = "/home/abdollah/Documents/ROSBAGs"
+# root_path = "/home/abdollah/Documents/ROSBAGs"
+root_path = "/home/abdollah/Documents/rosbag_archive/UR3/Converted_To_HDF"
+
 # root_path = "/home/abdollah/Documents/rosbag_archive/New_v1"
 # root_path = "/home/abdollah/Documents/rosbag_archive/Archive"
 
 # hdf_file_path = '/home/abdollah/Documents/New_HDF/Long/training_data_long.hdf5'
 # hdf_file_path = '/home/abdollah/Documents/New_HDF/Short/training_data_short.hdf5'
-hdf_file_path = '/home/abdollah/Documents/New_HDF/Med/training_data_medium.hdf5'
+hdf_file_path = '/home/abdollah/Documents/New_HDF/UR3/Long/training_data_medium_ur3.hdf'
 
 
 
